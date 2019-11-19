@@ -1,0 +1,6 @@
+.vscode/
+
+M3D-RPN-Release*
+data/
+lib/
+output/

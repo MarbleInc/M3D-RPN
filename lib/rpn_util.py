@@ -884,7 +884,7 @@ def project_3d_corners(p2, x3d, y3d, z3d, w3d, h3d, l3d, ry3d):
     5  upper back left
     6  bottom back left
     7  bottom back right
-    
+
     bot_inds = np.array([2,3,6,7])
     top_inds = np.array([0,1,4,5])
     '''
@@ -1313,7 +1313,10 @@ def get_2D_from_3D(p2, cx3d, cy3d, cz3d, w3d, h3d, l3d, rotY):
     return np.array([x, y, x2, y2])
 
 
-def test_kitti_3d(dataset_test, net, rpn_conf, results_path, test_path, use_log=True):
+def test_kitti_3d(
+    dataset_test, net, rpn_conf, results_path, test_path, use_log=True,
+    generate_visualizations=False, visualizations_path='',
+):
     """
     Test the KITTI framework for object detection in 3D
     """
@@ -1349,12 +1352,19 @@ def test_kitti_3d(dataset_test, net, rpn_conf, results_path, test_path, use_log=
 
         file = open(os.path.join(results_path, name + '.txt'), 'w')
         text_to_write = ''
-        
+
+        # Placeholders for visualizations, if applicable. One image visualizes the projected 3D
+        # boxes for all objects in the image; the other visualizes the BEV of all object boxes.
+        if generate_visualizations:
+            im_visualize_camera = im.copy()
+            im_visualize_bev = np.zeros((300, 300, 3), dtype=np.uint8)
+
         for boxind in range(0, min(rpn_conf.nms_topN_post, aboxes.shape[0])):
 
             box = aboxes[boxind, :]
             score = box[4]
-            cls = rpn_conf.lbls[int(box[5] - 1)]
+            cls_ind = int(box[5] - 1)
+            cls = rpn_conf.lbls[cls_ind]
 
             if score >= 0.75:
 
@@ -1393,12 +1403,36 @@ def test_kitti_3d(dataset_test, net, rpn_conf, results_path, test_path, use_log=
                 z3d = coord3d[2]
 
                 y3d += h3d/2
-                
+
                 text_to_write += ('{} -1 -1 {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} '
                            + '{:.6f} {:.6f}\n').format(cls, alpha, x1, y1, x2, y2, h3d, w3d, l3d, x3d, y3d, z3d, ry3d, score)
-                           
+
+                # Generate visualizations if applicable.
+                if generate_visualizations:
+                    # Draw projected 3D box for this object into the camera view visualization.
+                    draw_3d_box(
+                        im=im_visualize_camera,
+                        verts=verts_best,
+                        color=get_color(cls_ind),
+                        thickness=1,
+                    )
+
+                    # Draw BEV of this object's box into the BEV visualization.
+                    # TODO
+
+        # Write text results to file.
         file.write(text_to_write)
         file.close()
+
+        # Save visualizations to file.
+        if generate_visualizations:
+            # Visualization of camera view.
+            visualize_camera_path = os.path.join(visualizations_path, name + '_camera.png')
+            cv2.imwrite(visualize_camera_path, im_visualize_camera)
+
+            # Visualization of BEV.
+            # TODO
+            visualize_bev_path = os.path.join(visualizations_path, name + '_bev.png')
 
         # display stats
         if (imind + 1) % 1000 == 0:
