@@ -33,6 +33,7 @@ def load_conf(path):
     return conf
 
 
+# Detection tuple class.
 Detection = namedtuple('Detection', [
     'x1', 'y1', 'x2', 'y2',
     'x3d', 'y3d', 'z3d', 'ry3d', 'alpha',
