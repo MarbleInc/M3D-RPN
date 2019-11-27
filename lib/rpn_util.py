@@ -19,6 +19,9 @@ import torch.nn.functional as F
 from copy import deepcopy
 
 
+OBJECT_SCORE_THRESHOLD = 0.1 # 0.75 default.
+
+
 def generate_anchors(conf, imdb, cache_folder):
     """
     Generates the anchors according to the configuration and
@@ -1324,7 +1327,10 @@ def test_kitti_3d(
     # import read_kitti_cal
     from lib.imdb_util import read_kitti_cal
 
-    imlist = list_files(os.path.join(test_path, dataset_test, 'validation', 'image_2', ''), '*.png')
+    imlist = \
+        list_files(os.path.join(test_path, dataset_test, 'validation', 'image_2', ''), '*.png') + \
+        list_files(os.path.join(test_path, dataset_test, 'validation', 'image_2', ''), '*.jpg')
+
 
     preprocess = Preprocess([rpn_conf.test_scale], rpn_conf.image_means, rpn_conf.image_stds)
 
@@ -1342,7 +1348,10 @@ def test_kitti_3d(
         base_path, name, ext = file_parts(impath)
 
         # read in calib
-        p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
+        # KITTI calib.
+        # p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
+        # Marble calib.
+        p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', 'b1_pcam_left.txt'))
         p2_inv = np.linalg.inv(p2)
 
         # forward test batch
@@ -1357,7 +1366,7 @@ def test_kitti_3d(
         # boxes for all objects in the image; the other visualizes the BEV of all object boxes.
         if generate_visualizations:
             im_visualize_camera = im.copy()
-            im_visualize_bev = np.zeros((300, 300, 3), dtype=np.uint8)
+            im_visualize_bev = np.zeros((1000, 1000, 3), dtype=np.uint8)
 
         for boxind in range(0, min(rpn_conf.nms_topN_post, aboxes.shape[0])):
 
@@ -1366,7 +1375,7 @@ def test_kitti_3d(
             cls_ind = int(box[5] - 1)
             cls = rpn_conf.lbls[cls_ind]
 
-            if score >= 0.75:
+            if score >= OBJECT_SCORE_THRESHOLD:
 
                 x1 = box[0]
                 y1 = box[1]
@@ -1407,6 +1416,13 @@ def test_kitti_3d(
                 text_to_write += ('{} -1 -1 {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} '
                            + '{:.6f} {:.6f}\n').format(cls, alpha, x1, y1, x2, y2, h3d, w3d, l3d, x3d, y3d, z3d, ry3d, score)
 
+                # TODO: REMOVE
+                print('x3d: {}, y3d: {}, z3d: {}, w3d: {}, h3d: {}, l3d: {}, ry3d: {}'.format(
+                    x3d, y3d, z3d,
+                    w3d, h3d, l3d,
+                    ry3d,
+                ))
+
                 # Generate visualizations if applicable.
                 if generate_visualizations:
                     # Draw projected 3D box for this object into the camera view visualization.
@@ -1414,25 +1430,47 @@ def test_kitti_3d(
                         im=im_visualize_camera,
                         verts=verts_best,
                         color=get_color(cls_ind),
-                        thickness=1,
+                        thickness=3,
                     )
 
                     # Draw BEV of this object's box into the BEV visualization.
-                    # TODO
+                    print('draw_bev: z3d:{}, l3d:{}, w3d:{}, x3d:{}, ry3d:{}'.format(
+                        z3d, l3d, w3d, x3d, ry3d,
+                    ))
+                    draw_bev(
+                        canvas_bev=im_visualize_bev,
+                        z3d=z3d,
+                        l3d=l3d,
+                        w3d=w3d,
+                        x3d=x3d,
+                        ry3d=ry3d,
+                        scale=5,
+                        thickness=3,
+                    )
 
         # Write text results to file.
         file.write(text_to_write)
         file.close()
 
-        # Save visualizations to file.
+        # Save visualizations as a single stacked image: camera view on top, BEV on bottom.
         if generate_visualizations:
-            # Visualization of camera view.
-            visualize_camera_path = os.path.join(visualizations_path, name + '_camera.png')
-            cv2.imwrite(visualize_camera_path, im_visualize_camera)
-
-            # Visualization of BEV.
-            # TODO
-            visualize_bev_path = os.path.join(visualizations_path, name + '_bev.png')
+            # Flip BEV so closer objects are closer to bottom of image. Resize it to same
+            # size as im_visualize_camera so we can concatenate.
+            im_visualize_bev = np.flipud(im_visualize_bev)
+            print(im_visualize_bev.shape)
+            im_visualize_bev = cv2.resize(
+                im_visualize_bev,
+                (im_visualize_camera.shape[1], im_visualize_camera.shape[0]),
+                interpolation=cv2.INTER_NEAREST,
+            )
+            print(im_visualize_camera.shape)
+            print(im_visualize_bev.shape)
+            im_visualize = np.concatenate([
+                im_visualize_camera,
+                im_visualize_bev,
+            ])
+            print(im_visualize.shape)
+            cv2.imwrite(os.path.join(visualizations_path, name + '.png'), im_visualize)
 
         # display stats
         if (imind + 1) % 1000 == 0:
@@ -1442,6 +1480,10 @@ def test_kitti_3d(
 
             if use_log: logging.info(print_str)
             else: print(print_str)
+
+        # TODO: REMOVE
+        if imind >= 50:
+            break
 
 
     # evaluate

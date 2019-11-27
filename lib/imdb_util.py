@@ -277,7 +277,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # go through each batch
         for sample in batch:
-            
+
             # append images and object dictionaries
             imgs.append(sample[0])
             imobjs.append(sample[1])
@@ -592,4 +592,4 @@ def balance_samples(conf, imdb):
     sample_weights /= np.sum(sample_weights)
 
     return sample_weights
-    
+

@@ -32,13 +32,17 @@ generate_visualizations = args.generate_visualizations
 conf = edict(pickle_read(conf_path))
 conf.pretrained = None
 
-data_path = os.path.join(os.getcwd(), 'data')
+# KITTI data:
+# data_path = os.path.join(os.getcwd(), 'data')
+# Marble data:
+data_path = os.path.join(os.getcwd(), 'data_marble')
 tmp_results_path = os.path.join('output', 'tmp_results')
 results_path = os.path.join(tmp_results_path, 'data')
 visualizations_path = os.path.join(tmp_results_path, 'plot')
 
 # make directory
 mkdir_if_missing(results_path, delete_if_exist=True)
+mkdir_if_missing(visualizations_path, delete_if_exist=True)
 
 # -----------------------------------------
 # torch defaults

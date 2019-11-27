@@ -300,8 +300,8 @@ def draw_3d_box(im, verts, color=(0, 200, 200), thickness=1):
 
 def draw_bev(canvas_bev, z3d, l3d, w3d, x3d, ry3d, color=(0, 200, 200), scale=1, thickness=2):
 
-    w = l3d * scale
-    l = w3d * scale
+    w = w3d * scale
+    l = l3d * scale
     x = x3d * scale
     z = z3d * scale
     r = ry3d*-1
@@ -328,6 +328,19 @@ def draw_bev(canvas_bev, z3d, l3d, w3d, x3d, ry3d, color=(0, 200, 200), scale=1,
     draw_line(canvas_bev, corners2[1], corners2[2], color=color, thickness=thickness)
     draw_line(canvas_bev, corners2[2], corners2[3], color=color, thickness=thickness)
     draw_line(canvas_bev, corners2[3], corners2[0], color=color, thickness=thickness)
+
+    # print('draw_line: ({}, {}), ({}, {})'.format(
+    #     corners2[0], corners2[1],
+    #     corners2[1], corners2[2],
+    # ))
+
+    # TODO: Only draw once per BEV image.
+    # # Draw circle at approximate ego position (bottom-center of image).
+    # draw_circle(
+    #     im=canvas_bev,
+    #     pos=(1, canvas_bev.shape[1] / 2),
+    #     thickness=5,
+    # )
 
 
 def draw_line(im, v1, v2, color=(0, 200, 200), thickness=1):
