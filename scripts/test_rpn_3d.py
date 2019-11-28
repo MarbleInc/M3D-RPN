@@ -17,7 +17,7 @@ np.set_printoptions(suppress=True)
 # -----------------------------------------
 # custom modules
 # -----------------------------------------
-from lib.imdb_util import *
+from imdb_util import *
 
 conf_path = '/mnt/aux/ml_models/M3D-RPN/M3D-RPN-Release/m3d_rpn_depth_aware_test_config.pkl'
 weights_path = '/mnt/aux/ml_models/M3D-RPN/M3D-RPN-Release/m3d_rpn_depth_aware_test'

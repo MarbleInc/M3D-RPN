@@ -1,9 +1,16 @@
+import os
+import sys
+
 import torch.nn as nn
 from torchvision import models
-from lib.rpn_util import *
 import torch.nn.functional as F
 import torch
 
+# Hack to add root lib directory to path.
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + '/../lib'
+)
+from rpn_util import *
 
 def dilate_layer(layer, val):
     layer.dilation = val

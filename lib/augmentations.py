@@ -17,7 +17,7 @@ import math
 import os
 import sys
 
-from lib.util import *
+from util import *
 
 
 class Compose(object):

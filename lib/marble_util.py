@@ -2,6 +2,8 @@
 
 # TODO: Clean up imports?
 from collections import namedtuple
+import sys
+
 from easydict import EasyDict
 import numpy as np
 import torch
@@ -24,6 +26,17 @@ PREPROCESS = Preprocess(
     mean=PREPROCESS_IMAGE_MEANS_KITTI,
     stds=PREPROCESS_IMAGE_STDS_KITTI,
 )
+
+
+# TODO: Remove if not using.
+# def add_dir_to_path_for_internal_scripts():
+#     """
+#     Hack to match test_rpn_3d script and all lib scripts, which assumes we can import `lib.*`
+#     scripts from anywhere in this directory (even from inside lib itself).
+#     """
+#     sys.path.append(
+#         os.path.dirname(os.path.abspath(__file__)) + '/../'
+#     )
 
 
 def load_conf(path):

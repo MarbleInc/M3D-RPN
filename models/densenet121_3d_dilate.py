@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torchvision import models
-from lib.rpn_util import *
+from rpn_util import *
 import torch
 
 

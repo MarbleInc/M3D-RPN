@@ -10,10 +10,10 @@ import math
 import re
 import gc
 
-from lib.util import *
-from lib.core import *
-from lib.augmentations import *
-from lib.nms.gpu_nms import gpu_nms
+from util import *
+from core import *
+from augmentations import *
+from nms.gpu_nms import gpu_nms
 import torch.nn.functional as F
 
 from copy import deepcopy
@@ -1325,7 +1325,7 @@ def test_kitti_3d(
     """
 
     # import read_kitti_cal
-    from lib.imdb_util import read_kitti_cal
+    from imdb_util import read_kitti_cal
 
     imlist = \
         list_files(os.path.join(test_path, dataset_test, 'validation', 'image_2', ''), '*.png') + \

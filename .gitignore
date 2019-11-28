@@ -1,6 +1,8 @@
 .vscode/
+*.pyc
 
 M3D-RPN-Release*
 data/
+data_marble/
 lib/
 output/
