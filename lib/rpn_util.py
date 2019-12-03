@@ -1418,13 +1418,6 @@ def test_kitti_3d(
                 text_to_write += ('{} -1 -1 {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} '
                            + '{:.6f} {:.6f}\n').format(cls, alpha, x1, y1, x2, y2, h3d, w3d, l3d, x3d, y3d, z3d, ry3d, score)
 
-                # TODO: REMOVE print.
-                # print('x3d: {}, y3d: {}, z3d: {}, w3d: {}, h3d: {}, l3d: {}, ry3d: {}'.format(
-                #     x3d, y3d, z3d,
-                #     w3d, h3d, l3d,
-                #     ry3d,
-                # ))
-
                 # Generate visualizations if applicable.
                 if generate_visualizations:
                     # Draw projected 3D box for this object into the camera view visualization.
@@ -1436,10 +1429,6 @@ def test_kitti_3d(
                     )
 
                     # Draw BEV of this object's box into the BEV visualization.
-                    # TODO: Remove print.
-                    # print('draw_bev: z3d:{}, l3d:{}, w3d:{}, x3d:{}, ry3d:{}'.format(
-                    #     z3d, l3d, w3d, x3d, ry3d,
-                    # ))
                     draw_bev(
                         canvas_bev=im_visualize_bev,
                         z3d=z3d,

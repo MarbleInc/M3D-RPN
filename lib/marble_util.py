@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+"""
+Custom Marble module exposing detection functionality (such as for running inside a ROS node).
+"""
 
-# TODO: Clean up imports?
 from collections import namedtuple
 import sys
 
@@ -28,17 +30,6 @@ PREPROCESS = Preprocess(
 )
 
 
-# TODO: Remove if not using.
-# def add_dir_to_path_for_internal_scripts():
-#     """
-#     Hack to match test_rpn_3d script and all lib scripts, which assumes we can import `lib.*`
-#     scripts from anywhere in this directory (even from inside lib itself).
-#     """
-#     sys.path.append(
-#         os.path.dirname(os.path.abspath(__file__)) + '/../'
-#     )
-
-
 def load_conf(path):
     with open(path, 'rb') as f:
         conf = EasyDict(pickle.load(f))
@@ -63,7 +54,8 @@ def detect(
     use_log=True,
 ):
     """
-    TODO: Documentation. Note reference code: test_kitti_3d.
+    Primary detection function. Runs inference and returns detections for a single image. Adapted
+    from `test_kitti_3d`; see there for more info.
     """
     # Forward pass.
     aboxes = im_detect_3d(
