@@ -9,6 +9,9 @@ import sys
 import numpy as np
 import os
 
+DATA_TYPE_KITTI = 'kitti'
+DATA_TYPE_MARBLE = 'marble'
+
 # stop python from writing so much bytecode
 sys.dont_write_bytecode = True
 # sys.path.append(os.getcwd())
@@ -31,17 +34,24 @@ weights_path = './M3D-RPN-Release/m3d_rpn_depth_aware_test'
 # Parse CLI args.
 parser = argparse.ArgumentParser()
 parser.add_argument('--generate-visualizations', action='store_true')
+parser.add_argument(
+    '--data-type', type=str, required=True, choices=[DATA_TYPE_KITTI, DATA_TYPE_MARBLE],
+)
 args = parser.parse_args()
 generate_visualizations = args.generate_visualizations
+data_type = args.data_type
 
 # load config
 conf = edict(pickle_read(conf_path))
 conf.pretrained = None
 
-# KITTI data:
-data_path = os.path.join(os.getcwd(), 'data')
-# Marble data:
-# data_path = os.path.join(os.getcwd(), 'data_marble')
+if data_type == DATA_TYPE_KITTI:
+    data_path = os.path.join(os.getcwd(), 'data')
+    object_score_threshold = 0.75 # Use Kitti default.
+elif data_type == DATA_TYPE_MARBLE:
+    data_path = os.path.join(os.getcwd(), 'data_marble')
+    object_score_threshold = 0.25 # Reduced threshold to decrease false negatives.
+
 tmp_results_path = os.path.join('output', 'tmp_results')
 results_path = os.path.join(tmp_results_path, 'data')
 visualizations_path = os.path.join(tmp_results_path, 'plot')
@@ -79,4 +89,5 @@ print(pretty_print('conf', conf))
 test_kitti_3d(
     conf.dataset_test, net, conf, results_path, data_path, use_log=False,
     generate_visualizations=generate_visualizations, visualizations_path=visualizations_path,
+    object_score_threshold=object_score_threshold, data_type=data_type,
 )

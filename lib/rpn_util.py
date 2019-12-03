@@ -19,7 +19,6 @@ import torch.nn.functional as F
 from copy import deepcopy
 
 
-OBJECT_SCORE_THRESHOLD = 0.1 # 0.75 default.
 # If True, visualization output is both camera and BEV view; if False, just use camera view.
 VISUALIZE_WITH_BEV = True
 
@@ -1320,7 +1319,8 @@ def get_2D_from_3D(p2, cx3d, cy3d, cz3d, w3d, h3d, l3d, rotY):
 
 def test_kitti_3d(
     dataset_test, net, rpn_conf, results_path, test_path, use_log=True,
-    generate_visualizations=False, visualizations_path='',
+    generate_visualizations=False, visualizations_path='', object_score_threshold=0.75,
+    data_type='kitti',
 ):
     """
     Test the KITTI framework for object detection in 3D
@@ -1350,10 +1350,10 @@ def test_kitti_3d(
         base_path, name, ext = file_parts(impath)
 
         # read in calib
-        # KITTI calib.
-        p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
-        # Marble calib.
-        # p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', 'b1_pcam_left.txt'))
+        if data_type == 'kitti':
+            p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
+        elif data_type == 'marble':
+            p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', 'b1_pcam_left.txt'))
         p2_inv = np.linalg.inv(p2)
 
         # forward test batch
@@ -1377,7 +1377,7 @@ def test_kitti_3d(
             cls_ind = int(box[5] - 1)
             cls = rpn_conf.lbls[cls_ind]
 
-            if score >= OBJECT_SCORE_THRESHOLD:
+            if score >= object_score_threshold:
 
                 x1 = box[0]
                 y1 = box[1]
