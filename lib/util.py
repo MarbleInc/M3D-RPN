@@ -300,8 +300,8 @@ def draw_3d_box(im, verts, color=(0, 200, 200), thickness=1):
 
 def draw_bev(canvas_bev, z3d, l3d, w3d, x3d, ry3d, color=(0, 200, 200), scale=1, thickness=2):
 
-    w = w3d * scale
-    l = l3d * scale
+    w = l3d * scale
+    l = w3d * scale
     x = x3d * scale
     z = z3d * scale
     r = ry3d*-1

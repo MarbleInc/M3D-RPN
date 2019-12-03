@@ -21,10 +21,10 @@ sys.dont_write_bytecode = True
 # -----------------------------------------
 # custom
 # -----------------------------------------
-from lib.rpn_util import *
-from lib.util import *
-from lib.augmentations import *
-from lib.core import *
+from m3drpn.lib.rpn_util import *
+from m3drpn.lib.util import *
+from m3drpn.lib.augmentations import *
+from m3drpn.lib.core import *
 
 class Dataset(torch.utils.data.Dataset):
     """

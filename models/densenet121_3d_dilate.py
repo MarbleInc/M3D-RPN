@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torchvision import models
-from rpn_util import *
+from m3drpn.lib.rpn_util import *
 import torch
 
 

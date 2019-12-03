@@ -9,11 +9,11 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from augmentations import *
-from core import *
-from nms.gpu_nms import gpu_nms
-from rpn_util import *
-from util import *
+from m3drpn.lib.augmentations import *
+from m3drpn.lib.core import *
+from m3drpn.lib.nms.gpu_nms import gpu_nms
+from m3drpn.lib.rpn_util import *
+from m3drpn.lib.util import *
 
 
 OBJECT_SCORE_THRESHOLD = 0.3

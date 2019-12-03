@@ -10,16 +10,18 @@ import math
 import re
 import gc
 
-from util import *
-from core import *
-from augmentations import *
-from nms.gpu_nms import gpu_nms
+from m3drpn.lib.util import *
+from m3drpn.lib.core import *
+from m3drpn.lib.augmentations import *
+from m3drpn.lib.nms.gpu_nms import gpu_nms
 import torch.nn.functional as F
 
 from copy import deepcopy
 
 
 OBJECT_SCORE_THRESHOLD = 0.1 # 0.75 default.
+# If True, visualization output is both camera and BEV view; if False, just use camera view.
+VISUALIZE_WITH_BEV = True
 
 
 def generate_anchors(conf, imdb, cache_folder):
@@ -1325,7 +1327,7 @@ def test_kitti_3d(
     """
 
     # import read_kitti_cal
-    from imdb_util import read_kitti_cal
+    from m3drpn.lib.imdb_util import read_kitti_cal
 
     imlist = \
         list_files(os.path.join(test_path, dataset_test, 'validation', 'image_2', ''), '*.png') + \
@@ -1349,9 +1351,9 @@ def test_kitti_3d(
 
         # read in calib
         # KITTI calib.
-        # p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
+        p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', name + '.txt'))
         # Marble calib.
-        p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', 'b1_pcam_left.txt'))
+        # p2 = read_kitti_cal(os.path.join(test_path, dataset_test, 'validation', 'calib', 'b1_pcam_left.txt'))
         p2_inv = np.linalg.inv(p2)
 
         # forward test batch
@@ -1416,12 +1418,12 @@ def test_kitti_3d(
                 text_to_write += ('{} -1 -1 {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} '
                            + '{:.6f} {:.6f}\n').format(cls, alpha, x1, y1, x2, y2, h3d, w3d, l3d, x3d, y3d, z3d, ry3d, score)
 
-                # TODO: REMOVE
-                print('x3d: {}, y3d: {}, z3d: {}, w3d: {}, h3d: {}, l3d: {}, ry3d: {}'.format(
-                    x3d, y3d, z3d,
-                    w3d, h3d, l3d,
-                    ry3d,
-                ))
+                # TODO: REMOVE print.
+                # print('x3d: {}, y3d: {}, z3d: {}, w3d: {}, h3d: {}, l3d: {}, ry3d: {}'.format(
+                #     x3d, y3d, z3d,
+                #     w3d, h3d, l3d,
+                #     ry3d,
+                # ))
 
                 # Generate visualizations if applicable.
                 if generate_visualizations:
@@ -1434,9 +1436,10 @@ def test_kitti_3d(
                     )
 
                     # Draw BEV of this object's box into the BEV visualization.
-                    print('draw_bev: z3d:{}, l3d:{}, w3d:{}, x3d:{}, ry3d:{}'.format(
-                        z3d, l3d, w3d, x3d, ry3d,
-                    ))
+                    # TODO: Remove print.
+                    # print('draw_bev: z3d:{}, l3d:{}, w3d:{}, x3d:{}, ry3d:{}'.format(
+                    #     z3d, l3d, w3d, x3d, ry3d,
+                    # ))
                     draw_bev(
                         canvas_bev=im_visualize_bev,
                         z3d=z3d,
@@ -1454,23 +1457,23 @@ def test_kitti_3d(
 
         # Save visualizations as a single stacked image: camera view on top, BEV on bottom.
         if generate_visualizations:
-            # Flip BEV so closer objects are closer to bottom of image. Resize it to same
-            # size as im_visualize_camera so we can concatenate.
-            im_visualize_bev = np.flipud(im_visualize_bev)
-            print(im_visualize_bev.shape)
-            im_visualize_bev = cv2.resize(
-                im_visualize_bev,
-                (im_visualize_camera.shape[1], im_visualize_camera.shape[0]),
-                interpolation=cv2.INTER_NEAREST,
-            )
-            print(im_visualize_camera.shape)
-            print(im_visualize_bev.shape)
-            im_visualize = np.concatenate([
-                im_visualize_camera,
-                im_visualize_bev,
-            ])
-            print(im_visualize.shape)
-            cv2.imwrite(os.path.join(visualizations_path, name + '.png'), im_visualize)
+            visualization_path = os.path.join(visualizations_path, name + '.png')
+            if VISUALIZE_WITH_BEV:
+                # Flip BEV so closer objects are closer to bottom of image. Resize it to same
+                # size as im_visualize_camera so we can concatenate.
+                im_visualize_bev = np.flipud(im_visualize_bev)
+                im_visualize_bev = cv2.resize(
+                    im_visualize_bev,
+                    (im_visualize_camera.shape[1], im_visualize_camera.shape[0]),
+                    interpolation=cv2.INTER_NEAREST,
+                )
+                im_visualize = np.concatenate([
+                    im_visualize_camera,
+                    im_visualize_bev,
+                ])
+                cv2.imwrite(visualization_path, im_visualize)
+            else:
+                cv2.imwrite(visualization_path, im_visualize_camera)
 
         # display stats
         if (imind + 1) % 1000 == 0:
@@ -1480,10 +1483,6 @@ def test_kitti_3d(
 
             if use_log: logging.info(print_str)
             else: print(print_str)
-
-        # TODO: REMOVE
-        if imind >= 50:
-            break
 
 
     # evaluate

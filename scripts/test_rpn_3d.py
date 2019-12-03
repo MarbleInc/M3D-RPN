@@ -11,16 +11,22 @@ import os
 
 # stop python from writing so much bytecode
 sys.dont_write_bytecode = True
-sys.path.append(os.getcwd())
+# sys.path.append(os.getcwd())
 np.set_printoptions(suppress=True)
+
+# Hack to add top-level package to path so that we can run this script and import all dependencies
+# referencing the top-level package.
+sys.path.append(
+    os.path.dirname(os.path.abspath(__file__)) + '/../../'
+)
 
 # -----------------------------------------
 # custom modules
 # -----------------------------------------
-from imdb_util import *
+from m3drpn.lib.imdb_util import *
 
-conf_path = '/mnt/aux/ml_models/M3D-RPN/M3D-RPN-Release/m3d_rpn_depth_aware_test_config.pkl'
-weights_path = '/mnt/aux/ml_models/M3D-RPN/M3D-RPN-Release/m3d_rpn_depth_aware_test'
+conf_path = './M3D-RPN-Release/m3d_rpn_depth_aware_test_config.pkl'
+weights_path = './M3D-RPN-Release/m3d_rpn_depth_aware_test'
 
 # Parse CLI args.
 parser = argparse.ArgumentParser()
@@ -33,9 +39,9 @@ conf = edict(pickle_read(conf_path))
 conf.pretrained = None
 
 # KITTI data:
-# data_path = os.path.join(os.getcwd(), 'data')
+data_path = os.path.join(os.getcwd(), 'data')
 # Marble data:
-data_path = os.path.join(os.getcwd(), 'data_marble')
+# data_path = os.path.join(os.getcwd(), 'data_marble')
 tmp_results_path = os.path.join('output', 'tmp_results')
 results_path = os.path.join(tmp_results_path, 'data')
 visualizations_path = os.path.join(tmp_results_path, 'plot')
@@ -56,7 +62,7 @@ init_torch(conf.rng_seed, conf.cuda_seed)
 # -----------------------------------------
 
 # net
-net = import_module('models.' + conf.model).build(conf)
+net = import_module('m3drpn.models.' + conf.model).build(conf)
 
 # load weights
 load_weights(net, weights_path, remove_module=True)

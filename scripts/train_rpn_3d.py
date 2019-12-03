@@ -15,9 +15,9 @@ np.set_printoptions(suppress=True)
 # -----------------------------------------
 # custom modules
 # -----------------------------------------
-from core import *
-from imdb_util import *
-from loss.rpn_3d import *
+from m3drpn.lib.core import *
+from m3drpn.lib.imdb_util import *
+from m3drpn.lib.loss.rpn_3d import *
 
 
 def main(argv):

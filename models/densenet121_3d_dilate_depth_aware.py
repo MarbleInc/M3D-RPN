@@ -6,11 +6,7 @@ from torchvision import models
 import torch.nn.functional as F
 import torch
 
-# Hack to add root lib directory to path.
-sys.path.append(
-    os.path.dirname(os.path.abspath(__file__)) + '/../lib'
-)
-from rpn_util import *
+from m3drpn.lib.rpn_util import *
 
 def dilate_layer(layer, val):
     layer.dilation = val

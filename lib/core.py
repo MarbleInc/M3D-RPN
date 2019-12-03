@@ -30,7 +30,7 @@ sys.dont_write_bytecode = True
 # -----------------------------------------
 # custom modules
 # -----------------------------------------
-from lib.util import *
+from m3drpn.lib.util import *
 
 
 def init_config(conf_name):

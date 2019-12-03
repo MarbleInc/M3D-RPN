@@ -17,7 +17,7 @@ import math
 import os
 import sys
 
-from util import *
+from m3drpn.lib.util import *
 
 
 class Compose(object):
